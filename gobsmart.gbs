@@ -1,0 +1,208 @@
+program{
+    listadoDePagos := [Tarjeta, MartPago, Efectivo]
+    harina := Producto(nombre <- "Harina", marca <- "Morixe", precio <- 50)
+    listaDeProductos := [harina, harina, harina]
+    cliente1 := Cliente(dni <- 23113858, tipoDePago <- Efectivo, productos <- listaDeProductos)
+    ezequiel := Cliente(dni <- 43778092, tipoDePago <- Efectivo, productos <- listaDeProductos)
+    listaDeClientes1 := [cliente1, ezequiel]
+    listaDeClientes2 := [cliente1]
+    listaDeClientes3 := [cliente1, cliente1, cliente1]
+    listaDeClientes4 := [cliente1, cliente1]
+    caja1 := Caja(número <- 5, clientesEsperando <- listaDeClientes1, aceptaPagos <-
+    listadoDePagos, esRápida <- False, facturado <- 50)
+    caja2 := Caja(número <- 6, clientesEsperando <- listaDeClientes2, aceptaPagos <-
+    listadoDePagos, esRápida <- False, facturado <- 50)
+    caja3 := Caja(número <- 7, clientesEsperando <- listaDeClientes2, aceptaPagos <-
+    [MartPago, Efectivo], esRápida <- False, facturado <- 50)
+    caja4 := Caja(número <- 8, clientesEsperando <- listaDeClientes2, aceptaPagos <-
+    [ MartPago], esRápida <- False, facturado <- 50)
+    //FUNCIONES
+    return(caja_conPrimeroFacturado(caja1))
+}
+
+function caja_conPrimeroFacturado(caja){
+    facturacion := facturacionDe_(productos(primero(clientesEsperando(caja))))
+    return(
+        Caja(caja | 
+            facturado <- facturado(caja) + 
+            facturacion, clientesEsperando <- resto(clientesEsperando(caja)))
+    )
+
+}
+
+function facturacionDe_(productos){
+    total := 0
+    foreach producto in productos{
+        total := total + precio(producto)
+    }
+    return(total)
+}
+
+function gobsMart_conIngresosDe_(listaDeCajas, listadoDeClientes){
+    
+    listadoDeCajasActualizada := listaDeCajas
+    
+    foreach cliente in listadoDeClientes{
+        listadoDeCajasActualizada := gobsMart_conIngresoDe_aCaja_(listadoDeCajasActualizada, cliente,
+        número(cajaMenosOcupadaDe_ConMedio(listadoDeCajasActualizada, tipoDePago(cliente))))
+    }
+    
+    return(listadoDeCajasActualizada)
+}
+
+function cajaMenosOcupadaDe_ConMedio(listadoDeCajas, medioDePago){
+    /*
+    Proposito: describir la caja menos ocupada entre el listadoDeCajas dado
+    Precondicion:
+    Parametros: listadoDeCajas: Listado de Cajas
+    Tipo: Caja
+    */
+    cantidadDeClientes := cantidadDeClientesEsperandoEn_(primero(listadoDeCajas))
+    cajaADevolver := primero(listadoDeCajas)
+    
+    foreach caja in listadoDeCajas{
+        cajaADevolver := el_SiCumple_SiNo_(caja, 
+            cantidadDeClientesEsperandoEn_(caja) < cantidadDeClientes 
+            && indicaSi_Tiene_(caja, medioDePago),  cajaADevolver)
+            
+        cantidadDeClientes := cantidadDeClientesEsperandoEn_(cajaADevolver)
+    }
+    return(cajaADevolver)
+}
+
+function indicaSi_Tiene_(caja, medioDePago){
+    listadoDePagos := aceptaPagos(caja)
+    while(not esVacía(listadoDePagos) && primero(listadoDePagos) /= medioDePago){
+        listadoDePagos := resto(listadoDePagos)
+    }
+    
+    return(not esVacía(listadoDePagos))
+}
+
+function gobsMart_conIngresoDe_aCaja_(listaDeCajas, cliente, numeroDeCaja){
+    /*
+    PROPOSITO: Describir la misma listaDeCajas dada pero agregando a la caja "numeroDeCaja"
+    "cliente"
+    */
+    return(listaDeCajas_AntesDe(listaDeCajas, numeroDeCaja) ++ 
+    [cajaConClienteAgregado(cajaConNumero_En(numeroDeCaja, listaDeCajas), cliente)] ++ 
+    listaDeCajas_DespuesDe(listaDeCajas, numeroDeCaja) )
+}
+
+function cajaConClienteAgregado(caja, cliente){
+   return (Caja(caja | clientesEsperando <- clientesEsperando(caja) ++ [cliente]))
+}
+
+function cajaConNumero_En(numero, lista){
+     /**/
+    listaPorRecorrer := lista
+    while(número(primero(listaPorRecorrer)) /= numero){
+        listaPorRecorrer := resto(listaPorRecorrer)
+    }
+    return (primero(listaPorRecorrer))
+}
+
+function listaDeCajas_DespuesDe(lista, numero){
+    /**/
+    listaPorRecorrer := lista
+    while(número(primero(listaPorRecorrer)) /= numero){
+        listaPorRecorrer := resto(listaPorRecorrer)
+    }
+    return (resto(listaPorRecorrer))
+}
+
+function listaDeCajas_AntesDe(lista, numero){
+    /**/
+    listaADevolver := []
+    listaPorRecorrer := lista
+    while(número(primero(listaPorRecorrer)) /= numero){
+        listaADevolver := listaADevolver ++ [primero(listaPorRecorrer)]
+        listaPorRecorrer := resto(listaPorRecorrer)
+    }
+    return (listaADevolver)
+}
+
+function cajaMenosOcupadaDe_(listadoDeCajas){
+    /*
+    Proposito: describir la caja menos ocupada entre el listadoDeCajas dado
+    Precondicion:
+    Parametros: listadoDeCajas: Listado de Cajas
+    Tipo: Caja
+    */
+    cantidadDeClientes := cantidadDeClientesEsperandoEn_(primero(listadoDeCajas))
+    cajaADevolver := primero(listadoDeCajas)
+    
+    foreach caja in listadoDeCajas{
+        
+        cantidadDeClientes := el_SiCumple_SiNo_(cantidadDeClientesEsperandoEn_(caja),
+            cantidadDeClientesEsperandoEn_(caja) < cantidadDeClientes, cantidadDeClientes)
+        cajaADevolver := el_SiCumple_SiNo_(caja, 
+            cantidadDeClientesEsperandoEn_(caja) < cantidadDeClientes, cajaADevolver)
+    }
+    return(cajaADevolver)
+}
+
+function el_SiCumple_SiNo_(elemento1, condicion, elemento2){
+    /**/
+    return(
+        choose elemento1 when (condicion)  
+            elemento2 otherwise
+    )
+}
+
+function cantidadDeClientesEsperandoEn_(caja){
+    /*
+    Proposito: describir la cantidad de clientes esperando en una caja dada
+    Precondicion:
+    Parametros: caja: Caja
+    Tipo: Numero
+    */
+    return(longitudDe_(clientesEsperando(caja)))
+}
+
+type TipoDePago is variant {
+    /* PROP: modelar Tipos de pago aceptados */
+    case Tarjeta {}
+    case MartPago {}
+    case Efectivo {}
+}
+type Producto is record{
+    /* PROP: modelar productos
+    INV.REP.: precio > 0 */
+    field nombre // String
+    field marca // String
+    field precio // Número
+}
+type Cliente is record {
+    /* PROP: modelar clientes */
+    field dni // String
+    field tipoDePago // TipoDePago
+    field productos // [Producto]
+}
+type Caja is record {
+    /* PROP: modelar cajas
+    INV.REP.: número > 0
+    facturado >= 0 */
+    field número // Número
+    field clientesEsperando // [Cliente]
+    field aceptaPagos // [TipoDePago]
+    field esRápida // Bool
+    field facturado // Número
+}
+
+//HELPER FUNCTIONS
+
+function longitudDe_(lista){
+    cc := 0
+    listaAux := lista
+    while(not esVacía(listaAux)){
+        listaAux := resto(listaAux)
+        cc := cc + 1
+    }
+    return(cc)
+}
+
+
+
+
+
