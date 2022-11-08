@@ -1,0 +1,322 @@
+program {
+    americaChavez := Habitante(nombre <- "America Chavez", edad <- 28)
+    eze := Habitante(nombre <- "eze", edad <- 28)
+    listaDeHabitantes := [eze, americaChavez]
+    habitacion7 := Habitación(tipoDeHabitación <- Dormitorio, habitantes <- listaDeHabitantes)
+    listaDeHabitaciones := [habitacion7]
+    piso5 := Piso(número <- 5, habitaciones <- listaDeHabitaciones)
+    listaDePisos := [piso5]
+    torresDeBernal := Edificio(nombre <- "Torres", pisos <- listaDePisos)
+    listaDeEdificios := [torresDeBernal]
+    patricios := Calle(nombre <- "Patricios", edificios <- listaDeEdificios)
+    listaDeCalles := [patricios]
+    bernal := Barrio(nombre <- "Bernal", calles <- listaDeCalles)
+    listaDeBarrios := [bernal]
+    quilmes := Ciudad(nombre <- "Quilmes", barrios <- listaDeBarrios)
+    listaDeCiudades := [quilmes]
+    buenosAires := Provincia(nombre <- "Buenos Aires", ciudades <- listaDeCiudades)
+    listaDeProvincias := [buenosAires]
+    argentina := País(nombre <- "Argentina", provincias <- listaDeProvincias)
+    listaDePaises := [argentina]
+    america := Continente(nombre <- "America", países <- listaDePaises)
+    listaDeContinentes := [america]
+    tierra := Planeta(nombre <- "Tierra", continentes <- listaDeContinentes)
+    listaDePlanetas := [tierra]
+    viaLactia := Galaxia(nombre <- "Via Lactia", planetas <- listaDePlanetas)
+    listaDeGalaxias := [viaLactia]
+    multiverso := [Universo(nombre <- "Multiverso", galaxias <- listaDeGalaxias)]
+    return (enEsteMultiverso_EstaAmericaChavez(multiverso))
+}
+
+function enEsteMultiverso_EstaAmericaChavez(multiverso) {
+    /*
+        PROPÓSITO: Indica si en el multiverso dado se encuentra el Habitante llamado America Chavez
+        PARÁMETROS:
+            * multiverso: [Universo]
+        TIPO: Booleano
+        PRECONDICIONES: Ninguna
+        OBSERVACIONES: Recorrido de busqueda
+    */
+    listaDeUniversos := multiverso
+    while (not esVacía(listaDeUniversos) && not enEsteUniverso_EstaAmericaChavez(primero(listaDeUniversos))) {
+        listaDeUniversos := resto(listaDeUniversos)
+    }
+    return(not esVacía(listaDeUniversos))
+}
+
+function enEsteUniverso_EstaAmericaChavez(universo){
+    /*
+        PROPÓSITO: Indica si en el universo dado se encuentra el Habitante llamado America Chavez
+        PARÁMETROS:
+            * universo: Universo - Dentro contiene una lista de galaxias.
+        TIPO: Booleano
+        PRECONDICIONES: Ninguna
+    */
+    listaDeGalaxias := galaxias(universo)
+    while (not esVacía(listaDeGalaxias) && not enEstaGalaxia_EstaAmericaChavez(primero(listaDeGalaxias))) {
+        listaDeGalaxias := resto(listaDeGalaxias)
+    }
+    return(not esVacía(listaDeGalaxias))
+}
+function enEstaGalaxia_EstaAmericaChavez(galaxia){
+    /*
+        PROPÓSITO: Indica si en el galaxia dada se encuentra el Habitante llamado America Chavez
+        PARÁMETROS:
+            * galaxia: Galaxia - Dentro contiene una lista de planetas.
+        TIPO: Booleano
+        PRECONDICIONES: Ninguna
+    */
+    listaDePlanetas := planetas(galaxia)
+    while (not esVacía(listaDePlanetas) && not enEstePlaneta_EstaAmericaChavez(primero(listaDePlanetas))) {
+        listaDePlanetas := resto(listaDePlanetas)
+    }
+    return(not esVacía(listaDePlanetas))
+}
+
+function enEstePlaneta_EstaAmericaChavez(planeta){
+    /*
+        PROPÓSITO: Indica si en el planeta dado se encuentra el Habitante llamado America Chavez
+        PARÁMETROS:
+            * planeta: Planeta - Dentro contiene una lista de continentes.
+        TIPO: Booleano
+        PRECONDICIONES: Ninguna
+    */
+    listaDeContinentes := continentes(planeta)
+    while (not esVacía(listaDeContinentes) && not enEsteContinente_EstaAmericaChavez(primero(listaDeContinentes))) {
+        listaDeContinentes := resto(listaDeContinentes)
+    }
+    return(not esVacía(listaDeContinentes))
+}
+
+function enEsteContinente_EstaAmericaChavez(continente){
+    /*
+        PROPÓSITO: Indica si en el continente dado se encuentra el Habitante llamado America Chavez
+        PARÁMETROS:
+            * continente: Continente - Dentro contiene una lista de paises.
+        TIPO: Booleano
+        PRECONDICIONES: Ninguna
+    */
+    listaDePaises := países(continente)
+    while (not esVacía(listaDePaises) && not enEstePais_EstaAmericaChavez(primero(listaDePaises))) {
+        listaDePaises := resto(listaDePaises)
+    }
+    return(not esVacía(listaDePaises))
+}
+
+function enEstePais_EstaAmericaChavez(pais){
+    /*
+        PROPÓSITO: Indica si en el pais dado se encuentra el Habitante llamado America Chavez
+        PARÁMETROS:
+            * pais: Pais - Dentro contiene una lista de provincias.
+        TIPO: Booleano
+        PRECONDICIONES: Ninguna
+    */
+    listaDeProvincias := provincias(pais)
+    while (not esVacía(listaDeProvincias) && not enEstaProvincia_EstaAmericaChavez(primero(listaDeProvincias))) {
+        listaDeProvincias := resto(listaDeProvincias)
+    }
+    return(not esVacía(listaDeProvincias))
+}
+
+function enEstaProvincia_EstaAmericaChavez(provincia){
+    /*
+        PROPÓSITO: Indica si en la provincia dada se encuentra el Habitante llamado America Chavez
+        PARÁMETROS:
+            * provincia: Provincia - Dentro contiene una lista de provincias.
+        TIPO: Booleano
+        PRECONDICIONES: Ninguna
+    */
+    listaDeCiudades := ciudades(provincia)
+    while (not esVacía(listaDeCiudades) && not enEstaCiudad_EstaAmericaChavez(primero(listaDeCiudades))) {
+        listaDeCiudades := resto(listaDeCiudades)
+    }
+    return(not esVacía(listaDeCiudades))
+}
+
+function enEstaCiudad_EstaAmericaChavez(ciudad){
+    /*
+        PROPÓSITO: Indica si en la ciudad dada se encuentra el Habitante llamado America Chavez
+        PARÁMETROS:
+            * ciudad: Ciudad - Dentro contiene una lista de barrios.
+        TIPO: Booleano
+        PRECONDICIONES: Ninguna
+    */
+    listaDeBarrios := barrios(ciudad)
+    while (not esVacía(listaDeBarrios) && not  enEsteBarrio_EstaAmericaChavez(primero(listaDeBarrios))) {
+        listaDeBarrios := resto(listaDeBarrios)
+    }
+    return(not esVacía(listaDeBarrios))
+}
+
+function enEsteBarrio_EstaAmericaChavez(barrio){
+    /*
+        PROPÓSITO: Indica si en el barrio dada se encuentra el Habitante llamado America Chavez
+        PARÁMETROS:
+            * barrio: Barrio - Dentro contiene una lista de barrios.
+        TIPO: Booleano
+        PRECONDICIONES: Ninguna
+    */
+    listaDeCalles := calles(barrio)
+    while (not esVacía(listaDeCalles) && not enEstaCalle_EstaAmericaChavez(primero(listaDeCalles))) {
+        listaDeCalles := resto(listaDeCalles)
+    }
+    return(not esVacía(listaDeCalles))
+}
+
+function enEstaCalle_EstaAmericaChavez(calle){
+    /*
+        PROPÓSITO: Indica si en la calle dada se encuentra el Habitante llamado America Chavez
+        PARÁMETROS:
+            * calle: Calle - Dentro contiene una lista de barrios.
+        TIPO: Booleano
+        PRECONDICIONES: Ninguna
+    */
+    listaDeEdificios := edificios(calle)
+    while (not esVacía(listaDeEdificios) && not enEsteEdificio_EstaAmericaChavez(primero(listaDeEdificios))) {
+        listaDeEdificios := resto(listaDeEdificios)
+    }
+    return(not esVacía(listaDeEdificios))
+}
+
+function enEsteEdificio_EstaAmericaChavez(edificio){
+    /*
+        PROPÓSITO: Indica si en el edificio dado se encuentra el Habitante llamado America Chavez
+        PARÁMETROS:
+            * edificio: Edificio - Dentro contiene una lista de barrios.
+        TIPO: Booleano
+        PRECONDICIONES: Ninguna
+    */
+    listaDePisos := pisos(edificio)
+    while (not esVacía(listaDePisos) && not enEstePiso_EstaAmericaChavez(primero(listaDePisos))) {
+        listaDePisos := resto(listaDePisos)
+    }
+    return(not esVacía(listaDePisos))
+}
+
+function enEstePiso_EstaAmericaChavez(piso){
+    /*
+        PROPÓSITO: Indica si en el piso dado se encuentra el Habitante llamado America Chavez
+        PARÁMETROS:
+            * piso: Piso - Dentro contiene una lista de barrios.
+        TIPO: Booleano
+        PRECONDICIONES: Ninguna
+    */
+    listaDeHabitaciones := habitaciones(piso)
+    while (not esVacía(listaDeHabitaciones) && not enEstaHabitacion_EstaAmericaChavez(primero(listaDeHabitaciones))) {
+        listaDeHabitaciones := resto(listaDeHabitaciones)
+    }
+    return(not esVacía(listaDeHabitaciones))
+}
+
+function enEstaHabitacion_EstaAmericaChavez(habitacion){
+    /*
+        PROPÓSITO: Indica si en la habitacion dada se encuentra el Habitante llamado America Chavez
+        PARÁMETROS:
+            * habitacion: Habitacion - Dentro contiene una lista de habitantes.
+        TIPO: Booleano
+        PRECONDICIONES: Ninguna
+    */
+    listaDeHabitantes := habitantes(habitacion)
+    while (not esVacía(listaDeHabitantes) && not esEsteHabitante_AmericaChavez(primero(listaDeHabitantes))) {
+        listaDeHabitantes := resto(listaDeHabitantes)
+    }
+    return(not esVacía(listaDeHabitantes))
+}
+
+function esEsteHabitante_AmericaChavez(habitante){
+    /*
+        PROPÓSITO: Indica si en le habitante dado es America Chavez
+        PARÁMETROS:
+            * habitante: Habitante
+        TIPO: Booleano
+        PRECONDICIONES: Ninguna
+    */
+    return(nombre(habitante) == "America Chavez")
+}
+
+type Universo is record {
+  field nombre   // String
+  field galaxias // [Galaxia]
+}
+
+type Galaxia is record {
+  field nombre   // String
+  field planetas // [Planeta]
+}
+
+type Planeta is record {
+  field nombre      // String
+  field continentes // [Continente]
+}
+
+type Continente is record {
+  field nombre // String
+  field países // [País]
+}
+
+type País is record {
+  field nombre     // String
+  field provincias // [Provincia]
+}
+
+type Provincia is record {
+  field nombre   // String
+  field ciudades // [Ciudad]
+}
+
+type Ciudad is record {
+  field nombre  // String
+  field barrios // [Barrio]
+}
+
+type Barrio is record {
+  field nombre // String
+  field calles // [Calle]
+}
+
+type Calle is record {
+  field nombre    // String
+  field edificios // [Edificio]
+}
+
+type Edificio is record {
+  field nombre // String
+  field pisos  // [Piso]
+}
+
+type Piso is record {
+  field número       // Número
+  field habitaciones // [Habitación]
+}
+
+type Habitación is record {
+  field tipoDeHabitación // TipoDeHabitación
+  field habitantes       // [Habitante]
+}
+
+type Habitante is record {
+  field nombre // String
+  field edad   // Número
+}
+
+type TipoDeHabitación is variant {
+  case Dormitorio  {}
+  case Baño        {}
+  case Cocina      {}
+  case SalaDeEstar {}
+  case Templo      {}
+}
+
+/* 1. Escribir la función enQuéParteDelMultiverso_EstáAméricaChávezAhora que dado un multiverso (es decir, una lista de universos, obviamente) 
+describa en qué universo está la habitante llamada "América Chávez". Obviamente, existe un único habitante con ese nombre en todo el
+multiverso.
+2. Escribir la función estáWandaEnLaCocinaEn_ que dado un multiverso indica si en algún universo la habitante de nombre "Wanda Maximoff" está en la cocina.
+3. Escribir la función llevandoAWongAlTemploEn_ que dado un multiverso describe el mismo multiverso pero moviendo a cada habitante de nombre "Wong" a algún templo que esté en el mismo piso que la habitación en la que ya se encuentra. Si en tal piso no hay ningún templo, se lo deja en su ubicación actual.
+
+4. Escribir la función locuraDesatadaEn_ que dado un multiverso describe el mismo multiverso pero con los siguientes cambios:
+a) Desaparecen los planetas que no tienen ciudades.
+b) En los edificios que están en galaxias sobrepobladas, cambia la edad de cada habitante por la cantidad de habitantes de su provincia.
+c) Cada país que tenga al menos un habitante con más de 100 años cambia su nombre por el de la ciudad de ese universo que tiene al habitante más viejo. En caso de haber más de una ciudad entre las cuales elegir, se puede elegir cualquiera de ellas.
+
+Decimos que una galaxia es sobrepoblada si en cada planeta con más ciudades que edificios la cantidad de habitantes es un número primo.
+Puede utilizar la función primitiva esPrimo_ que dado un número indica si es primo. */
