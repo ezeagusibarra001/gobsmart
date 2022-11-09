@@ -1,76 +1,173 @@
 program{
     listadoDePagos := [Tarjeta, MartPago, Efectivo]
     harina := Producto(nombre <- "Harina", marca <- "Morixe", precio <- 50)
-    listaDeProductos := [harina, harina, harina]
+    galletas := Producto(nombre <- "Galletas", marca <- "Don Satur", precio <- 100)
+    marolio := Producto(nombre <- "Marolio", marca <- "Marolio", precio <- 100)
+    listaDeProductos := [galletas, harina, marolio]
     cliente1 := Cliente(dni <- 23113858, tipoDePago <- Efectivo, productos <- listaDeProductos)
     ezequiel := Cliente(dni <- 43778092, tipoDePago <- Efectivo, productos <- listaDeProductos)
-    listaDeClientes1 := [cliente1, ezequiel]
-    listaDeClientes2 := [cliente1]
-    listaDeClientes3 := [cliente1, cliente1, cliente1]
-    listaDeClientes4 := [cliente1, cliente1]
+    martin := Cliente(dni <- 11223344, tipoDePago <- Efectivo, productos <- listaDeProductos)
+    listaDeClientes1 := [ezequiel, martin]
+    listaDeClientes3 := [cliente1]
+    listaDeClientes4 := [cliente1, cliente1, ezequiel, martin]
     caja1 := Caja(número <- 5, clientesEsperando <- listaDeClientes1, aceptaPagos <-
     listadoDePagos, esRápida <- False, facturado <- 50)
-    caja2 := Caja(número <- 6, clientesEsperando <- listaDeClientes2, aceptaPagos <-
-    listadoDePagos, esRápida <- False, facturado <- 50)
-    caja3 := Caja(número <- 7, clientesEsperando <- listaDeClientes2, aceptaPagos <-
+    caja2 := Caja(número <- 7, clientesEsperando <- listaDeClientes3, aceptaPagos <-
     [MartPago, Efectivo], esRápida <- False, facturado <- 50)
-    caja4 := Caja(número <- 8, clientesEsperando <- listaDeClientes2, aceptaPagos <-
+    caja3 := Caja(número <- 8, clientesEsperando <- listaDeClientes4, aceptaPagos <-
     [ MartPago], esRápida <- False, facturado <- 50)
     //FUNCIONES
-    return(caja_conPrimeroFacturado(caja1))
+    return(
+        fila_ConAumentoDePrecioAMarolio(listaDeClientes1)
+    )
+}
+
+function fila_ConAumentoDePrecioAMarolio(listaDeClientes){
+    listaDeClientesActuaizada := []
+    foreach cliente in listaDeClientes{
+        listaDeClientesActuaizada := listaDeClientesActuaizada ++ 
+        [cliente_ConPrecioActualizadoSiCorresponde(cliente)]
+    }
+    return(listaDeClientesActuaizada)
+}
+
+function cliente_ConPrecioActualizadoSiCorresponde(cliente){
+    productosActualizados := []
+    foreach producto in productos(cliente) {
+        productosActualizados := productosActualizados ++ [producto_ActualizadoSiCorresponde(producto)]
+    }
+    return(
+        Cliente(cliente | productos <- productosActualizados)
+    )
+}
+
+function producto_ActualizadoSiCorresponde(producto){
+    return(
+        choose
+            Producto(producto | precio <- precio(producto) + 10) when (marca(producto) == "Marolio")
+            producto otherwise
+    )
+}
+
+function gobsMart_conCliente_cambiaACaja_(listaDeCajas, dniCliente, nroCaja){
+    return(
+        gobsMart_conIngresoDe_aCaja_(
+            listaDeCajasSinCliente_DeListaCajas_(clienteConDni_EnListaDeCajas_(dniCliente, listaDeCajas),listaDeCajas),
+            clienteConDni_EnListaDeCajas_(dniCliente, listaDeCajas),
+            nroCaja
+        )
+    )
+}
+
+function listaDeCajasSinCliente_DeListaCajas_(cliente, listaDeCajas){
+    listaDeCajasActuaizada := []
+    foreach caja in listaDeCajas{
+        listaDeCajasActuaizada := listaDeCajasActuaizada ++ [caja_SinCliente_(caja, cliente)]
+    }
+    return(listaDeCajasActuaizada)
+}
+
+function caja_SinCliente_(caja, cliente){
+    return(
+        Caja(
+            caja | clientesEsperando <- 
+            listaDeClientes_AntesDe_(clientesEsperando(caja), cliente) ++
+            listaDeClientes_DespuesDe_(clientesEsperando(caja), cliente)
+        )
+    )
+}
+
+function clienteConDni_EnListaDeCajas_(dni, listaDeCajas){
+    copiaListaDeCajas := listaDeCajas
+    while (not esCaja_ConClienteConDni_(primero(copiaListaDeCajas), dni)) {
+        copiaListaDeCajas := resto(copiaListaDeCajas)
+    }
+    return(clienteConDni_EnCaja_(dni, primero(copiaListaDeCajas)))
+}
+
+function clienteConDni_EnCaja_(dni, caja){
+    listaClientes := clientesEsperando(caja)
+    while(dni(primero(listaClientes)) /= dni){
+        listaClientes := resto(listaClientes)
+    }
+    return(primero(listaClientes))
+}
+
+function esCaja_ConClienteConDni_(caja, dni){
+    listaClientes := clientesEsperando(caja)
+    while(not esVacía(listaClientes) && dni(primero(listaClientes)) /= dni){
+        listaClientes := resto(listaClientes)
+    }
+    return(not esVacía(listaClientes))
+}
+
+function listaDeClientes_DespuesDe_(listaClientes, cliente){
+    copiaListaDeClientes := listaClientes
+    while(not esVacía(copiaListaDeClientes) && primero(copiaListaDeClientes) /= cliente){
+        copiaListaDeClientes := resto(copiaListaDeClientes)
+    }
+    return(
+        choose
+            resto(copiaListaDeClientes) when (not esVacía(copiaListaDeClientes))
+            [] otherwise
+    )
+}
+
+function listaDeClientes_AntesDe_(listaClientes, cliente){
+    listaDeClientesADevolver := []
+    copiaListaDeClientes := listaClientes
+    while(not esVacía(copiaListaDeClientes) && primero(copiaListaDeClientes) /= cliente){
+        listaDeClientesADevolver := listaDeClientesADevolver ++ [primero(copiaListaDeClientes)]
+        copiaListaDeClientes := resto(copiaListaDeClientes)
+    }
+    return(listaDeClientesADevolver)
 }
 
 function caja_conPrimeroFacturado(caja){
     facturacion := facturacionDe_(productos(primero(clientesEsperando(caja))))
     return(
-        Caja(caja | 
-            facturado <- facturado(caja) + 
-            facturacion, clientesEsperando <- resto(clientesEsperando(caja)))
+        Caja(caja | facturado <- facturado(caja) + facturacion, clientesEsperando <- resto(clientesEsperando(caja)))
     )
-
 }
 
 function facturacionDe_(productos){
-    total := 0
+    facturacion := 0
     foreach producto in productos{
-        total := total + precio(producto)
+        facturacion := facturacion + precio(producto)
     }
-    return(total)
+    return(facturacion)
 }
 
 function gobsMart_conIngresosDe_(listaDeCajas, listadoDeClientes){
-    
     listadoDeCajasActualizada := listaDeCajas
     
     foreach cliente in listadoDeClientes{
         listadoDeCajasActualizada := gobsMart_conIngresoDe_aCaja_(listadoDeCajasActualizada, cliente,
-        número(cajaMenosOcupadaDe_ConMedio(listadoDeCajasActualizada, tipoDePago(cliente))))
+        número(cajaMenosOcupadaDe_ConMedio_(listadoDeCajasActualizada, tipoDePago(cliente))))
     }
     
     return(listadoDeCajasActualizada)
 }
 
-function cajaMenosOcupadaDe_ConMedio(listadoDeCajas, medioDePago){
+function cajaMenosOcupadaDe_ConMedio_(listaDeCajas, medioDePago){
     /*
-    Proposito: describir la caja menos ocupada entre el listadoDeCajas dado
-    Precondicion:
-    Parametros: listadoDeCajas: Listado de Cajas
-    Tipo: Caja
+    PROPOSITO
     */
-    cantidadDeClientes := cantidadDeClientesEsperandoEn_(primero(listadoDeCajas))
-    cajaADevolver := primero(listadoDeCajas)
-    
-    foreach caja in listadoDeCajas{
-        cajaADevolver := el_SiCumple_SiNo_(caja, 
-            cantidadDeClientesEsperandoEn_(caja) < cantidadDeClientes 
-            && indicaSi_Tiene_(caja, medioDePago),  cajaADevolver)
-            
-        cantidadDeClientes := cantidadDeClientesEsperandoEn_(cajaADevolver)
+    cajaMenosOcupadaHastaAhora := primero(listaDeCajas)
+
+    foreach caja in listaDeCajas{
+        if(indicaSiLaCaja_TieneElMedio_(caja, medioDePago)){
+            cajaMenosOcupada := esteElemento_SiSeCumpleEstaCondicion_SiNo_(caja, 
+            cantidadDeClientesEsperandoEn_(caja) < cantidadDeClientesEsperandoEn_(cajaMenosOcupadaHastaAhora), cajaMenosOcupadaHastaAhora)
+        }
     }
-    return(cajaADevolver)
+
+    return(
+       cajaMenosOcupada
+    )
 }
 
-function indicaSi_Tiene_(caja, medioDePago){
+function indicaSiLaCaja_TieneElMedio_(caja, medioDePago){
     listadoDePagos := aceptaPagos(caja)
     while(not esVacía(listadoDePagos) && primero(listadoDePagos) /= medioDePago){
         listadoDePagos := resto(listadoDePagos)
@@ -79,70 +176,65 @@ function indicaSi_Tiene_(caja, medioDePago){
     return(not esVacía(listadoDePagos))
 }
 
-function gobsMart_conIngresoDe_aCaja_(listaDeCajas, cliente, numeroDeCaja){
+function gobsMart_conIngresoDe_aCaja_(listaDeCajas, cliente, numeroCaja){
+    return(
+        listaDeCajas_AntesDe_(listaDeCajas, numeroCaja) ++
+        [caja_ConCliente_Agregado(cajaEn_ConNumero_(listaDeCajas, numeroCaja), cliente)]++
+        listaDeCajas_DespuesDe(listaDeCajas, numeroCaja)
+
+    )
+}
+
+function caja_ConCliente_Agregado(caja, cliente){
+    return(
+        Caja(caja | clientesEsperando <- clientesEsperando(caja) ++ [cliente])
+    )
+}
+
+function cajaEn_ConNumero_(listaDeCajas, numeroDeCaja){
+    listaDeCajasADevolver := listaDeCajas
+    while(número(primero(listaDeCajasADevolver)) /= numeroDeCaja){
+        listaDeCajasADevolver := resto(listaDeCajasADevolver)
+    }
+    return(primero(listaDeCajasADevolver))
+}
+
+function listaDeCajas_DespuesDe(lista, numeroDeCaja){
+    listaDeCajasADevolver := lista
+    while(número(primero(listaDeCajasADevolver)) /= numeroDeCaja){
+        listaDeCajasADevolver := resto(listaDeCajasADevolver)
+    }
+    return(resto(listaDeCajasADevolver))
+}
+
+function listaDeCajas_AntesDe_(lista, numeroDeCaja){
+    listaDeCajasADevolver := []
+    copiaListaDeCajas := lista
+    while(número(primero(copiaListaDeCajas)) /= numeroDeCaja){
+        listaDeCajasADevolver := listaDeCajasADevolver ++ [primero(copiaListaDeCajas)]
+        copiaListaDeCajas := resto(copiaListaDeCajas)
+    }
+    return(listaDeCajasADevolver)
+}
+
+
+function cajaMenosOcupadaDe_(listaDeCajas){
     /*
-    PROPOSITO: Describir la misma listaDeCajas dada pero agregando a la caja "numeroDeCaja"
-    "cliente"
+    PROPOSITO
     */
-    return(listaDeCajas_AntesDe(listaDeCajas, numeroDeCaja) ++ 
-    [cajaConClienteAgregado(cajaConNumero_En(numeroDeCaja, listaDeCajas), cliente)] ++ 
-    listaDeCajas_DespuesDe(listaDeCajas, numeroDeCaja) )
-}
+    cajaMenosOcupadaHastaAhora := primero(listaDeCajas)
 
-function cajaConClienteAgregado(caja, cliente){
-   return (Caja(caja | clientesEsperando <- clientesEsperando(caja) ++ [cliente]))
-}
-
-function cajaConNumero_En(numero, lista){
-     /**/
-    listaPorRecorrer := lista
-    while(número(primero(listaPorRecorrer)) /= numero){
-        listaPorRecorrer := resto(listaPorRecorrer)
+    foreach caja in listaDeCajas{
+        cajaMenosOcupada := esteElemento_SiSeCumpleEstaCondicion_SiNo_(caja, 
+        cantidadDeClientesEsperandoEn_(caja) < cantidadDeClientesEsperandoEn_(cajaMenosOcupadaHastaAhora), cajaMenosOcupadaHastaAhora)
     }
-    return (primero(listaPorRecorrer))
+
+    return(
+       cajaMenosOcupada
+    )
 }
 
-function listaDeCajas_DespuesDe(lista, numero){
-    /**/
-    listaPorRecorrer := lista
-    while(número(primero(listaPorRecorrer)) /= numero){
-        listaPorRecorrer := resto(listaPorRecorrer)
-    }
-    return (resto(listaPorRecorrer))
-}
-
-function listaDeCajas_AntesDe(lista, numero){
-    /**/
-    listaADevolver := []
-    listaPorRecorrer := lista
-    while(número(primero(listaPorRecorrer)) /= numero){
-        listaADevolver := listaADevolver ++ [primero(listaPorRecorrer)]
-        listaPorRecorrer := resto(listaPorRecorrer)
-    }
-    return (listaADevolver)
-}
-
-function cajaMenosOcupadaDe_(listadoDeCajas){
-    /*
-    Proposito: describir la caja menos ocupada entre el listadoDeCajas dado
-    Precondicion:
-    Parametros: listadoDeCajas: Listado de Cajas
-    Tipo: Caja
-    */
-    cantidadDeClientes := cantidadDeClientesEsperandoEn_(primero(listadoDeCajas))
-    cajaADevolver := primero(listadoDeCajas)
-    
-    foreach caja in listadoDeCajas{
-        
-        cantidadDeClientes := el_SiCumple_SiNo_(cantidadDeClientesEsperandoEn_(caja),
-            cantidadDeClientesEsperandoEn_(caja) < cantidadDeClientes, cantidadDeClientes)
-        cajaADevolver := el_SiCumple_SiNo_(caja, 
-            cantidadDeClientesEsperandoEn_(caja) < cantidadDeClientes, cajaADevolver)
-    }
-    return(cajaADevolver)
-}
-
-function el_SiCumple_SiNo_(elemento1, condicion, elemento2){
+function esteElemento_SiSeCumpleEstaCondicion_SiNo_(elemento1, condicion, elemento2){
     /**/
     return(
         choose elemento1 when (condicion)  
@@ -150,15 +242,18 @@ function el_SiCumple_SiNo_(elemento1, condicion, elemento2){
     )
 }
 
-function cantidadDeClientesEsperandoEn_(caja){
+function cantidadDeClientesEsperandoEn_(caja) {
     /*
     Proposito: describir la cantidad de clientes esperando en una caja dada
     Precondicion:
     Parametros: caja: Caja
     Tipo: Numero
     */
-    return(longitudDe_(clientesEsperando(caja)))
+    return (
+        longitudDe_(clientesEsperando(caja))
+    )
 }
+
 
 type TipoDePago is variant {
     /* PROP: modelar Tipos de pago aceptados */
@@ -201,8 +296,3 @@ function longitudDe_(lista){
     }
     return(cc)
 }
-
-
-
-
-
